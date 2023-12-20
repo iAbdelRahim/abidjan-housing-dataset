@@ -41,8 +41,6 @@ class ScraperPipeline:
             exit(1)
 
     def process_item(self, item, spider):
-        """Load items into database.
-        This method is called for every item pipeline component."""
         if spider.name == "links":
             self.cur.execute(
                 """INSERT IGNORE INTO houses (link, website) VALUES (%s,%s)""",
@@ -50,22 +48,49 @@ class ScraperPipeline:
             )
             self.conn.commit()
         elif spider.name == "posts":
-            self.cur.execute(
-                """UPDATE houses
-                SET title = %s, description = %s, price = %s, tot_no_room = %s, area = %s, location = %s, pub_date = %s
-                WHERE link = %s
-                """,
-                (
-                    item["title"],
-                    item["description"],
-                    item["price"],
-                    item["tot_no_room"],
-                    item["area"],
-                    item["location"],
-                    item["pub_date"],
-                    item["link"],
+            # Check if the link already exists in the database
+            self.cur.execute("SELECT EXISTS(SELECT 1 FROM houses WHERE link = %s)", (item["link"],))
+            link_exists = self.cur.fetchone()[0]
+
+            if link_exists:
+                # If it exists, update only if the current item is more recent
+                self.cur.execute(
+                    """UPDATE houses
+                    SET title = %s, description = %s, price = %s, tot_no_room = %s, area = %s, location = %s, pub_date = %s
+                    WHERE link = %s
+                    AND pub_date < %s  
+                    """,
+                    # Only update if the existing pub_date is older
+                    (
+                        item["title"],
+                        item["description"],
+                        item["price"],
+                        item["tot_no_room"],
+                        item["area"],
+                        item["location"],
+                        item["pub_date"],
+                        item["link"],
+                        item["pub_date"],  # Use the item's pub_date for comparison
+                    )
                 )
-            )
+            else:
+                # If it doesn't exist, insert a new record
+                self.cur.execute(
+                    """INSERT INTO houses (title, description, price, tot_no_room, area, location, pub_date, link, website)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    (
+                        item["title"],
+                        item["description"],
+                        item["price"],
+                        item["tot_no_room"],
+                        item["area"],
+                        item["location"],
+                        item["pub_date"],
+                        item["link"],
+                        item["name"]  # Assuming you want to store website for new records
+                    )
+                )
+
             self.conn.commit()
         else:
             raise ValueError("Invalid spider name!")
