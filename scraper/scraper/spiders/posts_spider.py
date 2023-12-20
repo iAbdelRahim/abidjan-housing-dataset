@@ -28,23 +28,22 @@ class PostsSpider(scrapy.Spider):
         self.start_urls = [link[0] for link in links]
 
     def parse(self, response):
-        # TODO: Move selectors to config file
-        title_xpath = '//*[@id="main-holder"]/article/header/h1/span/text()'
-        price_selector = '#priceSection > span > span:nth-child(1)::attr("content")'
-        location_xpath = '//*[@id="priceSection"]/div/dl/dd[2]/span/text()'
-        pub_date_selector = '#priceSection > div > dl > dd:nth-child(6) > time::attr("datetime")'
-        description_xpath = '//*[@id="main-holder"]/article/div[1]/div/div[3]/p'
-        tot_no_room_xpath = '//*[@id="main-holder"]/article/div[1]/div/div[2]/div/h3[1]/span/text()'
-        area_xpath = '//*[@id="main-holder"]/article/div[1]/div/div[2]/div/h3[2]/span/text()'
+        title = self.config["selectors"]["posts"]["title"]
+        price = self.config["selectors"]["posts"]["price"]
+        location = self.config["selectors"]["posts"]["location"]
+        published_at = self.config["selectors"]["posts"]["published_at"]
+        description = self.config["selectors"]["posts"]["description"]
+        tot_no_room = self.config["selectors"]["posts"]["tot_no_room"]
+        area = self.config["selectors"]["posts"]["area"]
 
         yield {
-            'title': response.xpath(title_xpath).get(),
-            'description': self.remove_html(response.xpath(description_xpath).get()),
-            'price': float(response.css(price_selector).get()),
-            'tot_no_room': self.get_tot_no_room(response.xpath(tot_no_room_xpath).get()),
-            'area': self.get_area(response.xpath(area_xpath).get()),
-            'location': response.xpath(location_xpath).get(),
-            'pub_date': response.css(pub_date_selector).get(),
+            'title': self.remove_html(response.css(title).get()),
+            'description': self.remove_html(response.css(description).get()),
+            'price': float(self.remove_html(response.css(price).get())),
+            'tot_no_room': self.get_tot_no_room(self.remove_html((response.css(tot_no_room).get()))),
+            'area': self.get_area(self.remove_html(response.css(area).get())),
+            'location': self.remove_html(response.css(location).get()),
+            'published_at': self.remove_html(response.css(published_at).get()),
             'link': response.url,
         }
 

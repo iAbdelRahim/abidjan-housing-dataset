@@ -58,9 +58,8 @@ class ScraperPipeline:
                     """UPDATE houses
                     SET title = %s, description = %s, price = %s, tot_no_room = %s, area = %s, location = %s, pub_date = %s
                     WHERE link = %s
-                    AND pub_date < %s  
+                    AND pub_date < %s  # Only update if the existing pub_date is older
                     """,
-                    # Only update if the existing pub_date is older
                     (
                         item["title"],
                         item["description"],

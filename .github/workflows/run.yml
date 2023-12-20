@@ -1,0 +1,76 @@
+name: Run spiders
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+      - name: Install dependencies
+        run: poetry config virtualenvs.in-project false && poetry install
+      - name: Set up scraper config
+        env:
+          SCRAPER_CONFIG: ${{secrets.SCRAPER_CONFIG}}
+        shell: bash
+        run: echo "$SCRAPER_CONFIG" > scraper.toml
+        working-directory: ./scraper
+      - name: Upload scraper config
+        uses: actions/upload-artifact@v3
+        with:
+          name: scraper-config
+          path: scraper/scraper.toml
+
+  links:
+    name: Run links spider
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+      - name: Install dependencies
+        run: poetry config virtualenvs.in-project false && poetry install
+      - name: Download scraper config
+        uses: actions/download-artifact@v3
+        with:
+          name: scraper-config
+          path: scraper
+      - name: Run links spider
+        run: poetry run scrapy crawl links
+        working-directory: ./scraper
+
+  posts:
+    name: Run posts spider
+    needs: [ setup, links ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+      - name: Install dependencies
+        run: poetry config virtualenvs.in-project false && poetry install
+      - name: Download scraper config
+        uses: actions/download-artifact@v3
+        with:
+          name: scraper-config
+          path: scraper
+      - name: Run links spider
+        run: poetry run scrapy crawl posts
+        working-directory: ./scraper

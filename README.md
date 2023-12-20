@@ -1,8 +1,9 @@
 # Abidjan Housing Dataset
 
+[![DeepSource](https://app.deepsource.com/gh/marcaureln/abidjan-housing-dataset.svg/?label=active+issues&show_trend=true&token=Zgv0aeYVbniA0cDNCUrv89UJ)](https://app.deepsource.com/gh/marcaureln/abidjan-housing-dataset/?ref=repository-badge)
+
 Kinda equivalent to the _California Housing dataset_ (you can find it on [scikit-learn](https://inria.github.io/scikit-learn-mooc/python_scripts/datasets_california_housing.html)). 
 This dataset is resulting from data scraped from the popular listing website [Jumia Deals](https://deals.jumia.ci/).
-The raw data is already available (see [releases](https://github.com/marcaureln/abidjan-housing-dataset/releases)).
 
 ## Getting started
 

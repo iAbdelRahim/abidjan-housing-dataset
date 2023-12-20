@@ -4,11 +4,20 @@ user = 'admin'
 password = 'change-me'
 name = 'db-name'
 
-[start_urls]
-links = ['https://deals.co/appartements', 'https://deals.co/maisons']
+[links]
+base_url = 'https://deals.co'
+start_urls = ['https://deals.co/appartements', 'https://deals.co/maisons']
 
 [selectors]
-[[selectors.links]]
-name = 'Deals Co.'
+[selectors.links]
 link = 'div > a::attr("href")'
 next_page = 'nav > a::attr("href")'
+
+[selectors.posts]
+title = 'h1'
+price = '#price'
+location = '#address'
+published_at = '.post-date > span'
+description = '.description p'
+tot_no_room = '.details > div:nth-child(1) > span:nth-child(2)'
+area = '.details > div:nth-child(2) > span:nth-child(2)'
